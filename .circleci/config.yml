@@ -1,0 +1,45 @@
+version: 2.1
+
+orbs:
+  terraform: circleci/terraform@3.5.0
+
+workflows:
+  deploy_infrastructure:
+    jobs:
+      - terraform/fmt:
+          checkout: true
+          context: terraform
+          path: 
+      - terraform/validate:
+          checkout: true
+          context: terraform
+      - configure_backend:
+          steps:
+            - checkout
+            - run: 
+              command: echo "credentials \"app.terraform.io\" {token = \"TERRAFORM_TOKEN\"}" > $HOME/.terraformrc
+          requires:
+            - terraform/fmt
+            - terraform/validate
+      - terraform/init:
+          backend: true
+          checkout: true
+          context: terraform
+          requires:
+            - configure_backend
+      - terraform/plan:
+          backend: true
+          checkout: true
+          context: terraform
+          requires:
+            - terraform/init
+      - terraform/apply:
+          backend: true
+          checkout: true
+          context: terraform
+          requires:
+            - terraform/plan
+          filters:
+            branches:
+              only:
+                - master
