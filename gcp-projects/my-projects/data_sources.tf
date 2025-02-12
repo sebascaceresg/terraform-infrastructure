@@ -3,3 +3,5 @@ data "google_service_account_access_token" "default" {
   scopes                 = ["userinfo-email", "cloud-platform"]
   lifetime               = "300s"
 }
+
+
