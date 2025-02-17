@@ -1,45 +1,16 @@
 version: 2.1
 
+setup: true
+
 orbs:
-  terraform: circleci/terraform@3.5.0
+  path-filtering: circleci/path-filtering@1.2.0
 
 workflows:
-  deploy_infrastructure:
+  path_filtering:
     jobs:
-      - terraform/fmt:
-          checkout: true
-          context: terraform
-          path: 
-      - terraform/validate:
-          checkout: true
-          context: terraform
-      - configure_backend:
-          steps:
-            - checkout
-            - run: 
-              command: echo "credentials \"app.terraform.io\" {token = \"TERRAFORM_TOKEN\"}" > $HOME/.terraformrc
-          requires:
-            - terraform/fmt
-            - terraform/validate
-      - terraform/init:
-          backend: true
-          checkout: true
-          context: terraform
-          requires:
-            - configure_backend
-      - terraform/plan:
-          backend: true
-          checkout: true
-          context: terraform
-          requires:
-            - terraform/init
-      - terraform/apply:
-          backend: true
-          checkout: true
-          context: terraform
-          requires:
-            - terraform/plan
-          filters:
-            branches:
-              only:
-                - master
+      - path-filtering/filter:
+          name: "Check updated files"
+          mapping: |
+            gcp-projects/my-projects/.* gcp_my-projects true .circleci/gcp_my-projects.yml
+          base-revision: master
+          config-path: .circleci/gcp_my-projects.yml
