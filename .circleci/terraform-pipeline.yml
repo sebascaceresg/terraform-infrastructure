@@ -16,14 +16,12 @@ workflows:
     when: << pipeline.parameters.gcp-my-projects >>
     jobs:
       - terraform/fmt:
-        name: "Terraform format"
         checkout: true
         context: terraform
         filters:
           branches:
             only: feature/create-circleci-configuration
       - terraform/validate:
-        name: "Terraform validate"
         checkout: true
         context: terraform
         filters:
@@ -32,7 +30,6 @@ workflows:
         requires:
           - terraform/fmt
       - terraform/plan:
-        name: "Terraform plan"
         checkout: true
         context: terraform
         persist-workspace: true
@@ -42,7 +39,6 @@ workflows:
         requires:
           - terraform/validate
       - terraform/apply:
-        name: "Terraform apply"
         attach_workspace: true
         context: terraform
         filters:
@@ -54,14 +50,12 @@ workflows:
     when: << pipeline.parameters.gcp-hub-project >>
     jobs:
       - terraform/fmt:
-        name: "Terraform format"
         checkout: true
         context: terraform
         filters:
           branches:
             only: feature/create-circleci-configuration
       - terraform/validate:
-        name: "Terraform validate"
         checkout: true
         context: terraform
         filters:
@@ -70,7 +64,6 @@ workflows:
         requires:
           - terraform/fmt
       - terraform/plan:
-        name: "Terraform plan"
         checkout: true
         context: terraform
         persist-workspace: true
@@ -80,7 +73,6 @@ workflows:
         requires:
           - terraform/validate
       - terraform/apply:
-        name: "Terraform apply"
         attach_workspace: true
         context: terraform
         filters:
