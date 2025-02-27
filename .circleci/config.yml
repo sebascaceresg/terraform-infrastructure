@@ -6,7 +6,7 @@ executors:
       - image: cimg/gcp:2025.01
 
 jobs:
-  terraform-authenticate:
+  terraform-auth:
     executor: base-image
     steps:
       - checkout
@@ -14,9 +14,14 @@ jobs:
           command: |
             echo "gcloud auth activate-service-account --key-file=GCP_TF_SERVICE_ACCOUNT_KEY"
             gcloud --version
+            git --version
 
 workflows:
+  version: 2
   terraform-workflow:
-    when: pipeline.git.branch == "feature/create-circleci-configuration"
     jobs:
-      - terraform-authenticate
+      - terraform-auth:
+          filters:
+            branches:
+              only:
+                - feature/create-circleci-configuration
