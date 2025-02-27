@@ -1,16 +1,22 @@
 version: 2.1
 
-setup: true
+executors:
+  base-image:
+    docker:
+      - image: cimg/gcp:2025.01
 
-orbs:
-  path-filtering: circleci/path-filtering@1.2.0
+jobs:
+  terraform-authenticate:
+    executor: base-image
+    steps:
+      - checkout
+      - run:
+          command: |
+            echo "gcloud auth activate-service-account --key-file=GCP_TF_SERVICE_ACCOUNT_KEY"
+            gcloud --version
 
 workflows:
-  path_filtering:
+  terraform-workflow:
+    when: pipeline.git.branch == "feature/create-circleci-configuration"
     jobs:
-      - path-filtering/filter:
-          name: "Check updated files"
-          mapping: |
-            gcp-projects/my-projects/.* gcp_my-projects true .circleci/gcp_my-projects.yml
-          base-revision: master
-          config-path: .circleci/gcp_my-projects.yml
+      - terraform-authenticate

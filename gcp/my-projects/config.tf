@@ -20,3 +20,9 @@ provider "google" {
   project = var.project_id
 }
 
+provider "google" {
+  alias   = "hub_project"
+  region  = "us-central1"
+  project = "hub-project-452117"
+}
+

@@ -29,4 +29,5 @@ override.tf.json
 .vscode
 
 # Key files
-my-projects-450518-5eb8191475f7.json
+sa-keys
+*.json
