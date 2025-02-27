@@ -11,10 +11,32 @@ parameters:
     type: boolean
     default: false
 
+jobs:
+  tf-credentials:
+    executor:
+      docker:
+        image: cimg/base:2025.01
+    steps:
+      - checkout
+      - run:
+          command: |
+            echo "credentials \"app.terraform.io\" {token =
+            \"$GCP_TERRAFORM_SERVICE_KEY\"}" > $HOME/.terraformrc
+      - persist_to_workspace:
+          root: $HOME/
+          paths:
+            - .terraformrc
+
 workflows:
   my-projects-infra:
     when: << pipeline.parameters.gcp-my-projects >>
     jobs:
+      - tf-credentials:
+          name: "Setup Terraform Credentials"
+          context: terraform
+          filters:
+            branches:
+              only: feature/create-circleci-configuration
       - terraform/fmt:
           name: "Terraform fmt"
           checkout: true
@@ -23,6 +45,7 @@ workflows:
             branches:
               only: feature/create-circleci-configuration
       - terraform/validate:
+          name: "Terraform validate"
           checkout: true
           context: terraform
           filters:
@@ -31,9 +54,12 @@ workflows:
           requires:
             - terraform/fmt
       - terraform/plan:
+          name: "Terraform plan"
+          attach-workspace: true
+          workspace-root: $HOME/
           checkout: true
           context: terraform
-          persist-workspace: true
+          path: gcp/my-projects/.*
           filters:
             branches:
               only: feature/create-circleci-configuration
@@ -41,56 +67,12 @@ workflows:
             - terraform/validate
       - terraform/apply:
           attach-workspace: true
+          workspace-root: $HOME/
+          checkout: true
           context: terraform
+          path: gcp/my-projects/.*
           filters:
             branches:
               only: master
           requires:
             - terraform/plan
-  hub-project-infra:
-    when: << pipeline.parameters.gcp-hub-project >>
-    jobs:
-      - terraform/fmt:
-          checkout: true
-          context: terraform
-          filters:
-            branches:
-              only: feature/create-circleci-configuration
-      - terraform/validate:
-          checkout: true
-          context: terraform
-          filters:
-            branches:
-              only: feature/create-circleci-configuration
-          requires:
-            - terraform/fmt
-      - terraform/plan:
-          checkout: true
-          context: terraform
-          persist-workspace: true
-          filters:
-            branches:
-              only: feature/create-circleci-configuration
-          requires:
-            - terraform/validate
-      - terraform/apply:
-          attach_workspace: true
-          context: terraform
-          filters:
-            branches:
-              only: master
-          requires:
-            - terraform/plan
-
-# jobs:
-#   setup-gcp-credentials:
-#     executor: base-image
-#     steps:
-#       - run:
-#           command: |
-#             echo "$GCP_TERRAFORM_SERVICE_KEY" > /tmp/gcp-tf-key.json
-#       - persist_to_workspace:
-#           root: /tmp
-#           paths:
-#             - gcp-tf-key.json
-    
