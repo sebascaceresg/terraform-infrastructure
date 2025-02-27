@@ -1,27 +1,81 @@
 version: 2.1
 
-executors:
-  base-image:
-    docker:
-      - image: cimg/gcp:2025.01
+setup: true
 
-jobs:
-  terraform-auth:
-    executor: base-image
-    steps:
-      - checkout
-      - run:
-          command: |
-            echo "gcloud auth activate-service-account --key-file=GCP_TF_SERVICE_ACCOUNT_KEY"
-            gcloud --version
-            git --version
+orbs:
+  path-filtering: circleci/path-filtering@1.2.0
 
 workflows:
-  version: 2
-  terraform-workflow:
+  changed-paths:
     jobs:
-      - terraform-auth:
-          filters:
-            branches:
-              only:
-                - feature/create-circleci-configuration
+      - path-filtering/filter:
+          mapping: |
+            gcp/my-projects/.* gcp-my-projects true
+            gcp/hub-project/.* gcp-hub-project true
+          base-revision: master
+          config-path: .circleci/terraform-pipeline.yml
+        filter:
+          branches:
+            only:
+              - feature/create-circleci-configuration
+# jobs:
+#   filter-paths:
+#     executor:
+#       docker:
+#         - image: cimg/base:2025.01
+#     steps:
+#       - checkout
+#       - path-filtering/filter:
+#           mapping: |
+#             {
+#               "gcp_my_projects": "gcp/my-projects"
+#             }
+#       - run:
+#           command: cat path_filtering_output.json
+#       - persist_to_workspace:
+#           root: .
+#           paths:
+#             - path_filtering_output.json
+
+
+#   setup-gcp-credentials:
+#     executor: base-image
+#     steps:
+#       - run:
+#           command: |
+#             echo "$GCP_TERRAFORM_SERVICE_KEY" > /tmp/gcp-tf-key.json
+#       - persist_to_workspace:
+#           root: /tmp
+#           paths:
+#             - gcp-tf-key.json
+#   terraform-auth:
+#     executor: base-image
+#     steps:
+#       - checkout
+#       - attach_workspace:
+#           at: /tmp
+#       - run:
+#           command: |
+#             export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-tf-key.json
+#             cd ./gcp/my-projects
+#             terraform init
+
+# workflows:
+#   version: 2
+#   terraform-workflow:
+#     jobs:
+#       - setup-gcp-credentials:
+#           name: "GCP Credentials Setup"
+#           context: terraform
+#           filters:
+#             branches:
+#               only:
+#                 - feature/create-circleci-configuration
+#       - terraform-auth:
+#           name: "Terraform Init"
+#           context: terraform
+#           filters:
+#             branches:
+#               only:
+#                 - feature/create-circleci-configuration
+          
