@@ -16,70 +16,71 @@ workflows:
     when: << pipeline.parameters.gcp-my-projects >>
     jobs:
       - terraform/fmt:
-        checkout: true
-        context: terraform
-        filters:
-          branches:
-            only: feature/create-circleci-configuration
+          name: "Terraform fmt"
+          checkout: true
+          context: terraform
+          filters:
+            branches:
+              only: feature/create-circleci-configuration
       - terraform/validate:
-        checkout: true
-        context: terraform
-        filters:
-          branches:
-            only: feature/create-circleci-configuration
-        requires:
-          - terraform/fmt
+          checkout: true
+          context: terraform
+          filters:
+            branches:
+              only: feature/create-circleci-configuration
+          requires:
+            - terraform/fmt
       - terraform/plan:
-        checkout: true
-        context: terraform
-        persist-workspace: true
-        filters:
-          branches:
-            only: feature/create-circleci-configuration
-        requires:
-          - terraform/validate
+          checkout: true
+          context: terraform
+          persist-workspace: true
+          filters:
+            branches:
+              only: feature/create-circleci-configuration
+          requires:
+            - terraform/validate
       - terraform/apply:
-        attach_workspace: true
-        context: terraform
-        filters:
-          branches:
-            only: master
-        requires:
-          - terraform/plan
+          attach_workspace: true
+          context: terraform
+          filters:
+            branches:
+              only: master
+          requires:
+            - terraform/plan
   hub-project-infra:
     when: << pipeline.parameters.gcp-hub-project >>
     jobs:
       - terraform/fmt:
-        checkout: true
-        context: terraform
-        filters:
-          branches:
-            only: feature/create-circleci-configuration
+          checkout: true
+          context: terraform
+          filters:
+            branches:
+              only: feature/create-circleci-configuration
       - terraform/validate:
-        checkout: true
-        context: terraform
-        filters:
-          branches:
-            only: feature/create-circleci-configuration
-        requires:
-          - terraform/fmt
+          checkout: true
+          context: terraform
+          filters:
+            branches:
+              only: feature/create-circleci-configuration
+          requires:
+            - terraform/fmt
       - terraform/plan:
-        checkout: true
-        context: terraform
-        persist-workspace: true
-        filters:
-          branches:
-            only: feature/create-circleci-configuration
-        requires:
-          - terraform/validate
+          checkout: true
+          context: terraform
+          persist-workspace: true
+          filters:
+            branches:
+              only: feature/create-circleci-configuration
+          requires:
+            - terraform/validate
       - terraform/apply:
-        attach_workspace: true
-        context: terraform
-        filters:
-          branches:
-            only: master
-        requires:
-          - terraform/plan
+          attach_workspace: true
+          context: terraform
+          filters:
+            branches:
+              only: master
+          requires:
+            - terraform/plan
 
 # jobs:
 #   setup-gcp-credentials:
