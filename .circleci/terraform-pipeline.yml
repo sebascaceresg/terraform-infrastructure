@@ -20,9 +20,9 @@ jobs:
       - run:
           command: |
             echo "credentials \"app.terraform.io\" {token =
-            \"$GCP_TERRAFORM_SERVICE_KEY\"}" > $HOME/.terraformrc
+            \"$GCP_TERRAFORM_SERVICE_KEY\"}" > /home/circleci/.terraformrc
       - persist_to_workspace:
-          root: $HOME/
+          root: /home/circleci/
           paths:
             - .terraformrc
 
@@ -49,25 +49,25 @@ workflows:
               only: feature/create-circleci-configuration
           requires:
             - terraform/fmt
-      - terraform/plan:
-          attach-workspace: true
-          workspace-path: /home/circleci
-          checkout: true
-          context: terraform
-          path: ./gcp/my-projects
-          filters:
-            branches:
-              only: feature/create-circleci-configuration
-          requires:
-            - terraform/validate
-      - terraform/apply:
-          attach-workspace: true
-          workspace-path: /home/circleci
-          checkout: true
-          context: terraform
-          path: ./gcp/my-projects/
-          filters:
-            branches:
-              only: master
-          requires:
-            - terraform/plan
+      # - terraform/plan:
+      #     attach-workspace: true
+      #     workspace-path: /home/circleci
+      #     checkout: true
+      #     context: terraform
+      #     path: ./gcp/my-projects
+      #     filters:
+      #       branches:
+      #         only: feature/create-circleci-configuration
+      #     requires:
+      #       - terraform/validate
+      # - terraform/apply:
+      #     attach-workspace: true
+      #     workspace-path: /home/circleci
+      #     checkout: true
+      #     context: terraform
+      #     path: ./gcp/my-projects/
+      #     filters:
+      #       branches:
+      #         only: master
+      #     requires:
+      #       - terraform/plan
