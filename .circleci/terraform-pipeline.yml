@@ -13,9 +13,8 @@ parameters:
 
 jobs:
   tf-credentials:
-    executor:
-      docker:
-        image: cimg/base:2025.01
+    docker:
+      image: cimg/base:2025.01
     steps:
       - checkout
       - run:
