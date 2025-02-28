@@ -51,7 +51,7 @@ workflows:
             - terraform/fmt
       - terraform/plan:
           attach-workspace: true
-          workspace-path: $HOME/ # root: /home/circleci/project
+          workspace-path: /home/circleci
           checkout: true
           context: terraform
           path: ./gcp/my-projects
@@ -62,7 +62,7 @@ workflows:
             - terraform/validate
       - terraform/apply:
           attach-workspace: true
-          workspace-path: $HOME/
+          workspace-path: /home/circleci
           checkout: true
           context: terraform
           path: ./gcp/my-projects/
