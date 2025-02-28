@@ -31,20 +31,17 @@ workflows:
     when: << pipeline.parameters.gcp-my-projects >>
     jobs:
       - tf-credentials:
-          name: "Setup Terraform Credentials"
           context: terraform
           filters:
             branches:
               only: feature/create-circleci-configuration
       - terraform/fmt:
-          name: "Terraform fmt"
           checkout: true
           context: terraform
           filters:
             branches:
               only: feature/create-circleci-configuration
       - terraform/validate:
-          name: "Terraform validate"
           checkout: true
           context: terraform
           filters:
@@ -53,7 +50,6 @@ workflows:
           requires:
             - terraform/fmt
       - terraform/plan:
-          name: "Terraform plan"
           attach-workspace: true
           workspace-root: $HOME/
           checkout: true
