@@ -51,10 +51,10 @@ workflows:
             - terraform/fmt
       - terraform/plan:
           attach-workspace: true
-          workspace-root: $HOME/
+          workspace-path: $HOME/ # root: /home/circleci/project
           checkout: true
           context: terraform
-          path: gcp/my-projects/.*
+          path: ./gcp/my-projects
           filters:
             branches:
               only: feature/create-circleci-configuration
@@ -62,10 +62,10 @@ workflows:
             - terraform/validate
       - terraform/apply:
           attach-workspace: true
-          workspace-root: $HOME/
+          workspace-path: $HOME/
           checkout: true
           context: terraform
-          path: gcp/my-projects/.*
+          path: ./gcp/my-projects/
           filters:
             branches:
               only: master
