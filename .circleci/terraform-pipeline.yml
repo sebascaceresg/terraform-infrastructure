@@ -38,28 +38,30 @@ workflows:
       - terraform/fmt:
           checkout: true
           context: terraform
+          path: ./gcp/my-projects
           filters:
             branches:
               only: feature/create-circleci-configuration
       - terraform/validate:
           checkout: true
           context: terraform
+          path: ./gcp/my-projects
           filters:
             branches:
               only: feature/create-circleci-configuration
           requires:
             - terraform/fmt
-      # - terraform/plan:
-      #     attach-workspace: true
-      #     workspace-path: /home/circleci
-      #     checkout: true
-      #     context: terraform
-      #     path: ./gcp/my-projects
-      #     filters:
-      #       branches:
-      #         only: feature/create-circleci-configuration
-      #     requires:
-      #       - terraform/validate
+      - terraform/plan:
+          attach-workspace: true
+          workspace-path: /home/circleci
+          checkout: true
+          context: terraform
+          path: ./gcp/my-projects
+          filters:
+            branches:
+              only: feature/create-circleci-configuration
+          requires:
+            - terraform/validate
       # - terraform/apply:
       #     attach-workspace: true
       #     workspace-path: /home/circleci
