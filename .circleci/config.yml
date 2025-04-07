@@ -7,7 +7,6 @@ orbs:
 
 workflows:
   changed-paths:
-    when: << pipeline.git.branch =~ /^FEAT\/create-circleci-configuration/ >>
     jobs:
       - path-filtering/filter:
           base-revision: master
@@ -15,3 +14,6 @@ workflows:
           mapping: |
             gcp-projects/hub-project/.* gcp-hub-project true
             gcp-projects/my-projects/.* gcp-my-projects true
+          filters:
+            branches:
+              only: FEAT/create-circleci-configuration
