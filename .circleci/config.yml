@@ -9,73 +9,12 @@ workflows:
   changed-paths:
     jobs:
       - path-filtering/filter:
-          mapping: |
-            gcp/my-projects/.* gcp-my-projects true
-            gcp/hub-project/.* gcp-hub-project true
           base-revision: master
           config-path: .circleci/terraform-pipeline.yml
-        filter:
-          branches:
-            only:
-              - feature/create-circleci-configuration
-# jobs:
-#   filter-paths:
-#     executor:
-#       docker:
-#         - image: cimg/base:2025.01
-#     steps:
-#       - checkout
-#       - path-filtering/filter:
-#           mapping: |
-#             {
-#               "gcp_my_projects": "gcp/my-projects"
-#             }
-#       - run:
-#           command: cat path_filtering_output.json
-#       - persist_to_workspace:
-#           root: .
-#           paths:
-#             - path_filtering_output.json
-
-
-#   setup-gcp-credentials:
-#     executor: base-image
-#     steps:
-#       - run:
-#           command: |
-#             echo "$GCP_TERRAFORM_SERVICE_KEY" > /tmp/gcp-tf-key.json
-#       - persist_to_workspace:
-#           root: /tmp
-#           paths:
-#             - gcp-tf-key.json
-#   terraform-auth:
-#     executor: base-image
-#     steps:
-#       - checkout
-#       - attach_workspace:
-#           at: /tmp
-#       - run:
-#           command: |
-#             export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-tf-key.json
-#             cd ./gcp/my-projects
-#             terraform init
-
-# workflows:
-#   version: 2
-#   terraform-workflow:
-#     jobs:
-#       - setup-gcp-credentials:
-#           name: "GCP Credentials Setup"
-#           context: terraform
-#           filters:
-#             branches:
-#               only:
-#                 - feature/create-circleci-configuration
-#       - terraform-auth:
-#           name: "Terraform Init"
-#           context: terraform
-#           filters:
-#             branches:
-#               only:
-#                 - feature/create-circleci-configuration
-          
+          mapping: |
+            gcp-projects/hub-project/.* gcp-hub-project true
+            gcp-projects/my-projects/.* gcp-my-projects true
+          filter:
+            branches:
+              only:
+                - feature/create-circleci-configuration
