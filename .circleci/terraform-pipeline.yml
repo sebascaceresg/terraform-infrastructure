@@ -18,48 +18,53 @@ parameters:
 
 # Jobs #
 jobs:
-  tf-credentials:
+  # tf-credentials:
+  #   executor: terraform
+  #   steps:
+  #     - run: mkdir -p /tmp/.terraform.d
+  #     - run: echo "credentials \"app.terraform.io\" {token = \"$TF_TOKEN_app_terraform_io\"}" > /tmp/.terraform.d/credentials.tfrc.json
+  #     - persist_to_workspace:
+  #         root: /tmp
+  #         paths:
+  #           - .terraform.d
+  configure-ssh-keys:
     executor: terraform
     steps:
-      - run: mkdir -p /tmp/.terraform.d
-      - run: echo "credentials \"app.terraform.io\" {token = \"$TERRAFORM_TOKEN\"}" > /tmp/.terraform.d/credentials.tfrc.json
+      - run: |
+          mkdir -p ~/.ssh
+          echo $GITHUB_SSH_KEY_TF_MODULES | base64 -d > ~/.ssh/id_rsa_circleci_tfmod
+          chmod 600 ~/.ssh/id_rsa_circleci_tfmod
+          echo $GITHUB_KNOWN_HOSTS >> ~/.ssh/known_hosts
       - persist_to_workspace:
-          root: /tmp
+          root: ~/.ssh
           paths:
-            - .terraform.d
-  tf-validate-plan:
+            - .ssh
+  tf-init-validate:
     executor: terraform
     parameters:
       dir: { type: string }
     steps:
       - attach_workspace:
-          at: /tmp/workspace
-      - add_ssh_keys
+          at: ~/.ssh
       - checkout
-      - run:
-        command: |
-          mkdir -p ~/.ssh
-          echo $GITHUB_SSH_KEY_TF_MODULES | base64 -d > ~/.ssh/id_rsa_circleci_tfmod
-          chmod 600 ~/.ssh/id_rsa_circleci_tfmod
-          echo $GITHUB_KNOWN_HOSTS >> ~/.ssh/known_hosts
+      - run: |
           eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa_circleci_tfmod 
+          ssh-add ~/.ssh/id_rsa_circleci_tfmod
           terraform -chdir=<< parameters.dir >> fmt -check -diff
           terraform -chdir=<< parameters.dir >> init
           terraform -chdir=<< parameters.dir >> validate
-          terraform -chdir=<< parameters.dir >> plan
 
 workflows:
   hub-project-infrastructure:
     when: << pipeline.parameters.gcp-hub-project >>
     jobs:
-      - tf-credentials:
-          name: Set up Terraform Credentials
+      - configure-ssh-keys:
+          name: Configure SSH Keys
           context: terraform
       - tf-validate-plan:
-          name: Terraform Validate & Plan
+          name: Terraform Init & Validate
           context: terraform
           dir: gcp-projects/hub-project
           requires:
-            - "Set up Terraform Credentials":
+            - "Configure SSH Keys":
                 - success
