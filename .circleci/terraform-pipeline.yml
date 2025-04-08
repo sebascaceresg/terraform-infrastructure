@@ -41,9 +41,9 @@ jobs:
       - run: |
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa_circleci_tfmod
-          terraform -chdir=<< parameters.dir >> fmt -check -diff
           terraform -chdir=<< parameters.dir >> init
-          terraform -chdir=<< parameters.dir >> validate
+      - run: terraform -chdir=<< parameters.dir >> fmt -check -diff
+      - run: terraform -chdir=<< parameters.dir >> validate
       - persist_to_workspace:
           root: << parameters.dir >>
           paths:
@@ -57,9 +57,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: << parameters.dir >>
-      - run: |
-          terraform -chdir=<< parameters.dir >> init
-          terraform -chdir=<< parameters.dir >> plan
+      - run: terraform -chdir=<< parameters.dir >> init
+      - run: terraform -chdir=<< parameters.dir >> plan
       - persist_to_workspace:
           root: << parameters.dir >>
           paths:
@@ -73,9 +72,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: << parameters.dir >>
-      - run: |
-          terraform -chdir=<< parameters.dir >> init
-          terraform -chdir=<< parameters.dir >> apply -auto-approve
+      - run: terraform -chdir=<< parameters.dir >> init
+      - run: terraform -chdir=<< parameters.dir >> apply -auto-approve
 
 workflows:
   hub-project-infrastructure:
