@@ -34,11 +34,11 @@ jobs:
     executor: terraform
     steps:
       - run: mkdir -p /tmp/.terraform.d
-      - run: echo "credentials \"app.terraform.io\" {token = \"$TERRAFORM_TOKEN\"}" > /tmp/workspace/.terraform.d/credentials.tfrc.json
+      - run: echo "credentials \"app.terraform.io\" {token = \"$TERRAFORM_TOKEN\"}" > /tmp/.terraform.d/credentials.tfrc.json
       - persist_to_workspace:
           root: /tmp
           paths:
-            - workspace
+            - .terraform.d
   tf-validate-plan:
     executor: terraform
     parameters:
