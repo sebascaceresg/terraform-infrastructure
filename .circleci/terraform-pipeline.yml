@@ -16,17 +16,25 @@ parameters:
     type: boolean
     default: false
 
+commands:
+  terraform-init-validate:
+    name: Terraform init and validate
+    steps:
+      - run: |
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa_circleci_tfmod
+          terraform -chdir=<< parameters.dir >> fmt -check -diff
+          terraform -chdir=<< parameters.dir >> init
+          terraform -chdir=<< parameters.dir >> validate
+  terraform-plan:
+    name: Terraform plan
+    steps:
+      - run: |
+          terraform -chdir=<< parameters.dir >> init
+          terraform -chdir=<< parameters.dir >> plan -out=tfplan
+
 # Jobs #
 jobs:
-  # tf-credentials:
-  #   executor: terraform
-  #   steps:
-  #     - run: mkdir -p /tmp/.terraform.d
-  #     - run: echo "credentials \"app.terraform.io\" {token = \"$TF_TOKEN_app_terraform_io\"}" > /tmp/.terraform.d/credentials.tfrc.json
-  #     - persist_to_workspace:
-  #         root: /tmp
-  #         paths:
-  #           - .terraform.d
   configure-ssh-keys:
     executor: terraform
     steps:
@@ -47,12 +55,27 @@ jobs:
       - attach_workspace:
           at: /root
       - checkout
-      - run: |
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa_circleci_tfmod
-          terraform -chdir=<< parameters.dir >> fmt -check -diff
-          terraform -chdir=<< parameters.dir >> init
-          terraform -chdir=<< parameters.dir >> validate
+      - terraform-init-validate
+      - persist_to_workspace:
+          root: << parameters.dir >>
+          paths:
+            - .terraform
+            - .terraform.lock.hcl
+  tf-plan:
+    executor: terraform
+    parameters:
+      dir: { type: string }
+    steps:
+      - checkout
+      - attach_workspace:
+          at: << parameters.dir >>
+      - terraform-plan
+      - persist_to_workspace:
+          root: << parameters.dir >>
+          paths:
+            - .terraform
+            - .terraform.lock.hcl
+            - tfplan
 
 workflows:
   hub-project-infrastructure:
@@ -67,4 +90,11 @@ workflows:
           dir: gcp-projects/hub-project
           requires:
             - "Configure SSH Keys":
+                - success
+      - tf-plan:
+          name: Terraform Plan
+          context: terraform
+          dir: gcp-projects/hub-project
+          requires:
+            - "Terraform Init & Validate":
                 - success
