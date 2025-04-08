@@ -20,21 +20,20 @@ parameters:
 jobs:
   tf-credentials:
     executor: terraform
-    context: terraform
     steps:
-      - run: mkdir -p ~/.terraform.d
-      - run: echo "credentials \"app.terraform.io\" {token = \"$TERRAFORM_TOKEN\"}" > ~/.terraform.d/credentials.tfrc.json
+      - run: mkdir -p /tmp/workspace/.terraform.d
+      - run: echo "credentials \"app.terraform.io\" {token = \"$TERRAFORM_TOKEN\"}" > /tmp/workspace/.terraform.d/credentials.tfrc.json
       - persist_to_workspace:
-          root: ~/.terraform.d
+          root: /tmp/workspace
           paths:
-            - credentials.tfrc.json
+            - .terraform.d/credentials.tfrc.json
   tf-validate-plan:
     executor: terraform
     parameters:
       dir: { type: string }
     steps:
       - attach_workspace:
-          at: ~/.terraform.d
+          at: /tmp/workspace
       - checkout
       - run: cd << parameters.dir >>
       - run: terraform fmt -check
