@@ -21,7 +21,7 @@ commands:
   add_ssh_keys:
     steps:
       - run:
-        commands: |
+        command: |
           mkdir -p ~/.ssh
           echo $GITHUB_SSH_KEY_TFMODULES | base64 -d > ~/.ssh/id_rsa_circleci_tfmod
           chmod 600 ~/.ssh/id_rsa_circleci_tfmod
@@ -32,7 +32,6 @@ commands:
 # Jobs #
 jobs:
   tf-credentials:
-    name:
     executor: terraform
     steps:
       - run: mkdir -p /tmp/.terraform.d
