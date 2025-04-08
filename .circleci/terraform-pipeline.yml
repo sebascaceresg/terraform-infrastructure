@@ -19,6 +19,7 @@ parameters:
 # Jobs #
 jobs:
   tf-credentials:
+    name:
     executor: terraform
     steps:
       - run: mkdir -p /tmp/workspace/.terraform.d
@@ -50,7 +51,7 @@ workflows:
     when: << pipeline.parameters.gcp-hub-project >>
     jobs:
       - tf-credentials:
-          name: Setting up Terraform Credentials
+          name: Set up Terraform Credentials
           context: terraform
       - tf-validate-plan:
           name: Terraform Validate & Plan
