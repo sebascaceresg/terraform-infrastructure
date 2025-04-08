@@ -59,13 +59,23 @@ jobs:
           at: << parameters.dir >>
       - run: |
           terraform -chdir=<< parameters.dir >> init
-          terraform -chdir=<< parameters.dir >> plan -out=tfplan
+          terraform -chdir=<< parameters.dir >> plan
       - persist_to_workspace:
           root: << parameters.dir >>
           paths:
             - .terraform
             - .terraform.lock.hcl
-            - tfplan
+  tf-apply:
+    executor: terraform
+    parameters:
+      dir: { type: string }
+    steps:
+      - checkout
+      - attach_workspace:
+          at: << parameters.dir >>
+      - run: |
+          terraform -chdir=<< parameters.dir >> init
+          terraform -chdir=<< parameters.dir >> apply -auto-approve
 
 workflows:
   hub-project-infrastructure:
@@ -74,6 +84,7 @@ workflows:
       - configure-ssh-keys:
           name: Configure SSH Keys
           context: terraform
+          filters: pipeline.event.name == "pull_request" and pipeline.git.branch != "master"
       - tf-init-validate:
           name: Terraform Init & Validate
           context: terraform
@@ -81,6 +92,7 @@ workflows:
           requires:
             - "Configure SSH Keys":
                 - success
+          filters: pipeline.event.name == "pull_request" and pipeline.git.branch != "master"
       - tf-plan:
           name: Terraform Plan
           context: terraform
@@ -88,3 +100,15 @@ workflows:
           requires:
             - "Terraform Init & Validate":
                 - success
+          filters: pipeline.event.name == "pull_request" and pipeline.git.branch != "master"
+      - tf-apply:
+          name: Terraform Apply
+          context: terraform
+          dir: gcp-projects/hub-project
+          requires:
+            - "Terraform Plan":
+                - success
+          filters:
+            branches:
+              only:
+                - master
