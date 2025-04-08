@@ -50,7 +50,6 @@ jobs:
           at: /tmp/workspace
       - add_ssh_keys
       - checkout
-      - mv /tmp/workspace/.terraform.d ~/.terraform.d
       - run: terraform fmt -check
       - run: terraform -chdir=<< parameters.dir >> init
       - run: terraform -chdir=<< parameters.dir >> validate
