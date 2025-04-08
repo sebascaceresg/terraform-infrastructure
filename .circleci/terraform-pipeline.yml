@@ -18,7 +18,6 @@ parameters:
 
 commands:
   terraform-init-validate:
-    name: Terraform init and validate
     steps:
       - run: |
           eval "$(ssh-agent -s)"
@@ -27,7 +26,6 @@ commands:
           terraform -chdir=<< parameters.dir >> init
           terraform -chdir=<< parameters.dir >> validate
   terraform-plan:
-    name: Terraform plan
     steps:
       - run: |
           terraform -chdir=<< parameters.dir >> init
