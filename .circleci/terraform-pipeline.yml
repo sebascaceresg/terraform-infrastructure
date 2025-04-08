@@ -38,7 +38,6 @@ jobs:
           fingerprints:
             - "SHA256:w9BpElALXAxQQKMHzLd0wYDEdqsuLCX49OAS35SDr9s"
       - checkout
-      - run: ls -a
       - run: terraform fmt -check
       - run: terraform -chdir=<< parameters.dir >> init
       - run: terraform -chdir=<< parameters.dir >> validate
