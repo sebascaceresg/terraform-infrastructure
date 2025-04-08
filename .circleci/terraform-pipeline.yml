@@ -20,11 +20,14 @@ parameters:
 commands:
   add_ssh_keys:
     steps:
-      - run: echo $GITHUB_SSH_KEY_TFMODULES | base64 -d > ~/.ssh/id_rsa_circleci_tfmod
-      - run: chmod 600 ~/.ssh/id_rsa_circleci_tfmod
-      - run: eval "$(ssh-agent -s)"
-      - run: ssh-add ~/.ssh/id_rsa_circleci_tfmod
-      - run: echo $GITHUB_KNOWN_HOSTS >> ~/.ssh/known_hosts
+      - run:
+        commands: |
+          mkdir -p ~/.ssh
+          echo $GITHUB_SSH_KEY_TFMODULES | base64 -d > ~/.ssh/id_rsa_circleci_tfmod
+          chmod 600 ~/.ssh/id_rsa_circleci_tfmod
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa_circleci_tfmod
+          echo $GITHUB_KNOWN_HOSTS >> ~/.ssh/known_hosts
 
 # Jobs #
 jobs:
@@ -32,7 +35,7 @@ jobs:
     name:
     executor: terraform
     steps:
-      - run: mkdir -p /tmp/workspace/.terraform.d
+      - run: mkdir -p /tmp/.terraform.d
       - run: echo "credentials \"app.terraform.io\" {token = \"$TERRAFORM_TOKEN\"}" > /tmp/workspace/.terraform.d/credentials.tfrc.json
       - persist_to_workspace:
           root: /tmp
@@ -47,6 +50,7 @@ jobs:
           at: /tmp/workspace
       - add_ssh_keys
       - checkout
+      - mv /tmp/workspace/.terraform.d ~/.terraform.d
       - run: terraform fmt -check
       - run: terraform -chdir=<< parameters.dir >> init
       - run: terraform -chdir=<< parameters.dir >> validate
