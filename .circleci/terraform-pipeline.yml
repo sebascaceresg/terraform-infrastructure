@@ -57,5 +57,5 @@ workflows:
           context: terraform
           dir: gcp-projects/hub-project
           requires:
-            - tf-credentials:
+            - "Set up Terraform Credentials":
                 - success
