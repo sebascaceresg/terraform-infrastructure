@@ -62,9 +62,9 @@ workflows:
           name: Configure SSH Keys
           context: terraform
       - tf-init-validate:
-        name: Terraform Init & Validate
-        context: terraform
-        dir: gcp-projects/hub-project
-        requires:
-          - "Configure SSH Keys":
-              - success
+          name: Terraform Init & Validate
+          context: terraform
+          dir: gcp-projects/hub-project
+          requires:
+            - "Configure SSH Keys":
+                - success
