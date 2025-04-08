@@ -24,9 +24,9 @@ commands:
           mkdir -p ~/.ssh
           echo $GITHUB_SSH_KEY_TF_MODULES | base64 -d > ~/.ssh/id_rsa_circleci_tfmod
           chmod 600 ~/.ssh/id_rsa_circleci_tfmod
+          echo $GITHUB_KNOWN_HOSTS >> ~/.ssh/known_hosts
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/id_rsa_circleci_tfmod
-          echo $GITHUB_KNOWN_HOSTS >> ~/.ssh/known_hosts
 
 # Jobs #
 jobs:
