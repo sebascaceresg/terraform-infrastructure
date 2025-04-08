@@ -39,7 +39,6 @@ jobs:
           fingerprints:
             - "SHA256:w9BpElALXAxQQKMHzLd0wYDEdqsuLCX49OAS35SDr9s"
       - run: echo $GITHUB_KNOWN_HOSTS >> ~/.ssh/known_hosts
-      - run: eval "$(ssh-agent -s)" && ssh-add ~/.ssh/*
       - checkout
       - run: terraform fmt -check
       - run: terraform -chdir=<< parameters.dir >> init
