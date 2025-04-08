@@ -6,7 +6,7 @@ orbs:
   path-filtering: circleci/path-filtering@1.2.0
 
 workflows:
-  changed-paths:
+  changing-dirs:
     jobs:
       - path-filtering/filter:
           name: Filter Changing Directories
