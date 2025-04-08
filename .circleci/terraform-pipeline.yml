@@ -49,11 +49,10 @@ workflows:
     when: << pipeline.parameters.gcp-hub-project >>
     jobs:
       - tf-credentials:
-          name: Set Up Terraform Credentials
           context: terraform
       - tf-validate-plan:
-          name: Terraform Validate & Plan
           context: terraform
           dir: gcp-projects/hub-project
           requires:
-            - tf-credentials
+            - tf-credentials:
+                - success
