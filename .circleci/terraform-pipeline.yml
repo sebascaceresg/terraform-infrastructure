@@ -16,21 +16,6 @@ parameters:
     type: boolean
     default: false
 
-commands:
-  terraform-init-validate:
-    steps:
-      - run: |
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa_circleci_tfmod
-          terraform -chdir=<< parameters.dir >> fmt -check -diff
-          terraform -chdir=<< parameters.dir >> init
-          terraform -chdir=<< parameters.dir >> validate
-  terraform-plan:
-    steps:
-      - run: |
-          terraform -chdir=<< parameters.dir >> init
-          terraform -chdir=<< parameters.dir >> plan -out=tfplan
-
 # Jobs #
 jobs:
   configure-ssh-keys:
@@ -53,7 +38,12 @@ jobs:
       - attach_workspace:
           at: /root
       - checkout
-      - terraform-init-validate
+      - run: |
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa_circleci_tfmod
+          terraform -chdir=<< parameters.dir >> fmt -check -diff
+          terraform -chdir=<< parameters.dir >> init
+          terraform -chdir=<< parameters.dir >> validate
       - persist_to_workspace:
           root: << parameters.dir >>
           paths:
@@ -67,7 +57,9 @@ jobs:
       - checkout
       - attach_workspace:
           at: << parameters.dir >>
-      - terraform-plan
+      - run: |
+          terraform -chdir=<< parameters.dir >> init
+          terraform -chdir=<< parameters.dir >> plan -out=tfplan
       - persist_to_workspace:
           root: << parameters.dir >>
           paths:
