@@ -16,6 +16,16 @@ parameters:
     type: boolean
     default: false
 
+# Commands #
+commands:
+  add_ssh_keys:
+    steps:
+      - run: echo $GITHUB_SSH_KEY_TFMODULES | base64 -d > ~/.ssh/id_rsa_circleci_tfmod
+      - run: chmod 600 ~/.ssh/id_rsa_circleci_tfmod
+      - run: eval "$(ssh-agent -s)"
+      - run: ssh-add ~/.ssh/id_rsa_circleci_tfmod
+      - run: echo $GITHUB_KNOWN_HOSTS >> ~/.ssh/known_hosts
+
 # Jobs #
 jobs:
   tf-credentials:
@@ -35,10 +45,7 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp/workspace
-      - add_ssh_keys:
-          fingerprints:
-            - "SHA256:w9BpElALXAxQQKMHzLd0wYDEdqsuLCX49OAS35SDr9s"
-      - run: echo $GITHUB_KNOWN_HOSTS >> ~/.ssh/known_hosts
+      - add_ssh_keys
       - checkout
       - run: terraform fmt -check
       - run: terraform -chdir=<< parameters.dir >> init
