@@ -20,8 +20,7 @@ parameters:
 commands:
   add_ssh_keys:
     steps:
-      - run:
-        command: |
+      - run: |
           mkdir -p ~/.ssh
           echo $GITHUB_SSH_KEY_TFMODULES | base64 -d > ~/.ssh/id_rsa_circleci_tfmod
           chmod 600 ~/.ssh/id_rsa_circleci_tfmod
