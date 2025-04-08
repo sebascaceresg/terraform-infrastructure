@@ -9,6 +9,7 @@ workflows:
   changed-paths:
     jobs:
       - path-filtering/filter:
+          name: Filtering paths with changes
           base-revision: master
           config-path: .circleci/terraform-pipeline.yml
           mapping: |
