@@ -45,7 +45,7 @@ jobs:
       dir: { type: string }
     steps:
       - attach_workspace:
-          at: ~/.ssh
+          at: /root
       - checkout
       - run: |
           eval "$(ssh-agent -s)"
