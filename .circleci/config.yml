@@ -1,45 +1,19 @@
 version: 2.1
 
+setup: true
+
 orbs:
-  terraform: circleci/terraform@3.5.0
+  path-filtering: circleci/path-filtering@1.2.0
 
 workflows:
-  deploy_infrastructure:
+  changing-dirs:
     jobs:
-      - terraform/fmt:
-          checkout: true
-          context: terraform
-          path: 
-      - terraform/validate:
-          checkout: true
-          context: terraform
-      - configure_backend:
-          steps:
-            - checkout
-            - run: 
-              command: echo "credentials \"app.terraform.io\" {token = \"TERRAFORM_TOKEN\"}" > $HOME/.terraformrc
-          requires:
-            - terraform/fmt
-            - terraform/validate
-      - terraform/init:
-          backend: true
-          checkout: true
-          context: terraform
-          requires:
-            - configure_backend
-      - terraform/plan:
-          backend: true
-          checkout: true
-          context: terraform
-          requires:
-            - terraform/init
-      - terraform/apply:
-          backend: true
-          checkout: true
-          context: terraform
-          requires:
-            - terraform/plan
+      - path-filtering/filter:
+          name: Filter Changing Directories
+          base-revision: master
+          config-path: .circleci/terraform-pipeline.yml
+          mapping: |
+            gcp-projects/hub-project/.* gcp-hub-project true
           filters:
             branches:
-              only:
-                - master
+              only: master

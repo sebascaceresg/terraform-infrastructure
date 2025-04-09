@@ -1,0 +1,113 @@
+version: 2.1
+
+# Executors #
+executors:
+  terraform:
+    docker:
+      - image: hashicorp/terraform:1.11.3
+    resource_class: small
+
+# Parameters #
+parameters:
+  gcp-hub-project:
+    type: boolean
+    default: false
+  gcp-my-projects:
+    type: boolean
+    default: false
+
+# Jobs #
+jobs:
+  configure-ssh-keys:
+    executor: terraform
+    steps:
+      - run: |
+          mkdir -p ~/.ssh
+          echo $GITHUB_SSH_KEY_TF_MODULES | base64 -d > ~/.ssh/id_rsa_circleci_tfmod
+          chmod 600 ~/.ssh/id_rsa_circleci_tfmod
+          echo $GITHUB_KNOWN_HOSTS >> ~/.ssh/known_hosts
+      - persist_to_workspace:
+          root: /root
+          paths:
+            - .ssh
+  tf-init-validate:
+    executor: terraform
+    parameters:
+      dir: { type: string }
+    steps:
+      - attach_workspace:
+          at: /root
+      - checkout
+      - run: |
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa_circleci_tfmod
+          terraform -chdir=<< parameters.dir >> init
+      - run: terraform -chdir=<< parameters.dir >> fmt -check -diff
+      - run: terraform -chdir=<< parameters.dir >> validate
+      - persist_to_workspace:
+          root: << parameters.dir >>
+          paths:
+            - .terraform
+            - .terraform.lock.hcl
+  tf-plan:
+    executor: terraform
+    parameters:
+      dir: { type: string }
+    steps:
+      - checkout
+      - attach_workspace:
+          at: << parameters.dir >>
+      - run: terraform -chdir=<< parameters.dir >> init
+      - run: terraform -chdir=<< parameters.dir >> plan
+      - persist_to_workspace:
+          root: << parameters.dir >>
+          paths:
+            - .terraform
+            - .terraform.lock.hcl
+  tf-apply:
+    executor: terraform
+    parameters:
+      dir: { type: string }
+    steps:
+      - checkout
+      - attach_workspace:
+          at: << parameters.dir >>
+      - run: terraform -chdir=<< parameters.dir >> init
+      - run: terraform -chdir=<< parameters.dir >> apply -auto-approve
+
+# Workflow #
+workflows:
+  hub-project-infrastructure:
+    when: << pipeline.parameters.gcp-hub-project >>
+    jobs:
+      - configure-ssh-keys:
+          name: Configure SSH Keys
+          context: terraform
+          filters: pipeline.event.name == "pull_request" and pipeline.git.branch != "master"
+      - tf-init-validate:
+          name: Terraform Init & Validate
+          context: terraform
+          dir: gcp-projects/hub-project
+          requires:
+            - "Configure SSH Keys":
+                - success
+          filters: pipeline.event.name == "pull_request" and pipeline.git.branch != "master"
+      - tf-plan:
+          name: Terraform Plan
+          context: terraform
+          dir: gcp-projects/hub-project
+          requires:
+            - "Terraform Init & Validate":
+                - success
+          filters: pipeline.event.name == "pull_request" and pipeline.git.branch != "master"
+      - tf-apply:
+          name: Terraform Apply
+          context: terraform
+          dir: gcp-projects/hub-project
+          requires:
+            - "Terraform Plan":
+                - success
+          filters:
+            branches:
+              only:
+                - master
