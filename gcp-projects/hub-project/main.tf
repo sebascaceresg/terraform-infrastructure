@@ -18,3 +18,4 @@ module "shared-vpc-private" {
   psa_purpose                   = "VPC_PEERING"
 
 }
+

@@ -14,6 +14,4 @@ workflows:
           config-path: .circleci/terraform-pipeline.yml
           mapping: |
             gcp-projects/hub-project/.* gcp-hub-project true
-          filters:
-            branches:
-              only: master
+          filters: pipeline.event.name == "pull_request"
