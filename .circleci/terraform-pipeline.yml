@@ -104,10 +104,4 @@ workflows:
           name: Terraform Apply
           context: terraform
           dir: gcp-projects/hub-project
-          requires:
-            - "Terraform Plan":
-                - success
-          filters:
-            branches:
-              only:
-                - master
+          filters: pipeline.git.branch == "master"

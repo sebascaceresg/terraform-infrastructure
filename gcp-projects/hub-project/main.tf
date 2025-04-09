@@ -1,4 +1,4 @@
-# <---------- VPC ----------> #
+# <------------ VPC ------------> #
 module "shared-vpc-private" {
   source = "git@github.com:sebascaceresg/terraform-modules.git//GCP/vpc?ref=master"
 
