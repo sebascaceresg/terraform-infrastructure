@@ -48,7 +48,6 @@ jobs:
           root: << parameters.dir >>
           paths:
             - .terraform
-            - .terraform.lock.hcl
   tf-plan:
     executor: terraform
     parameters:
@@ -59,21 +58,19 @@ jobs:
           at: << parameters.dir >>
       - run: terraform -chdir=<< parameters.dir >> init
       - run: terraform -chdir=<< parameters.dir >> plan
-      - persist_to_workspace:
-          root: << parameters.dir >>
+      - save_cache:
+          key: terraform-<< parameters.dir >>-{{ checksum "<< parameters.dir >>/.terraform.lock.hcl" }}
           paths:
-            - .terraform
-            - .terraform.lock.hcl
+            - << parameters.dir >>/.terraform
   tf-apply:
     executor: terraform
     parameters:
       dir: { type: string }
     steps:
       - checkout
-      - run: |
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa_circleci_tfmod
-          terraform -chdir=<< parameters.dir >> init
+      - restore_cache:
+          key: terraform-<< parameters.dir >>-{{ checksum "<< parameters.dir >>/.terraform.lock.hcl" }}
+      - run: terraform -chdir=<< parameters.dir >> init
       - run: terraform -chdir=<< parameters.dir >> apply -auto-approve
 
 # Workflow #
