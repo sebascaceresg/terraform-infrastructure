@@ -70,9 +70,10 @@ jobs:
       dir: { type: string }
     steps:
       - checkout
-      - attach_workspace:
-          at: << parameters.dir >>
-      - run: terraform -chdir=<< parameters.dir >> init
+      - run: |
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa_circleci_tfmod
+          terraform -chdir=<< parameters.dir >> init
       - run: terraform -chdir=<< parameters.dir >> apply -auto-approve
 
 # Workflow #

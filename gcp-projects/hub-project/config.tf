@@ -16,6 +16,6 @@ terraform {
 }
 
 provider "google" {
-  region  = "us-east4"
-  project = "hub-project-452117"
+  region  = var.region
+  project = var.project_id
 }
